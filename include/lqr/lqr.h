@@ -1,0 +1,109 @@
+#ifndef LQR_H
+#define LQR_H
+
+#include <ros/ros.h>
+#include <rosflight_msgs/Command.h>
+#include <nav_msgs/Odometry.h>
+#include <sensor_msgs/Imu.h>
+
+#include <Eigen/Core>
+
+#include "lin_alg_tools/care.h"
+#include "geometry/quat.h"
+
+enum : int {
+  xPOS = 0,
+  xVEL = 3,
+  xATT = 6,
+  xZ = 10
+};
+
+enum : int {
+  dxPOS = 0,
+  dxVEL = 3,
+  dxATT = 6,
+  dxZ = 9
+};
+
+enum : int {
+  uTHROTTLE = 0,
+  uOMEGA = 1,
+  uZ = 4,
+};
+
+typedef Eigen::Matrix<double, xZ, 1> StateVector;
+typedef Eigen::Matrix<double, dxZ, 1> ErrStateVector;
+typedef Eigen::Matrix<double, uZ, 1> InputVector;
+typedef Eigen::Matrix<double, dxZ, dxZ> ErrStateErrStateMatrix;
+typedef Eigen::Matrix<double, dxZ, uZ> ErrStateInputMatrix;
+typedef Eigen::Matrix<double, uZ, dxZ> InputErrStateMatrix;
+typedef Eigen::Matrix<double, uZ, uZ> InputInputMatrix;
+
+namespace lqr
+{
+class LQRController
+{
+public:
+  LQRController();
+  void computeControl(const StateVector &x, const StateVector &x_c,
+                      const InputVector &ur, InputVector &u);
+
+private:
+  const double grav_val_ = 9.8;
+  double hover_throttle_;
+  double drag_const_;
+
+  double max_pos_err_;
+  double max_ang_err_;
+  double max_vel_err_;
+  double max_throttle_err_;
+  double max_omega_err_;
+
+  double max_throttle_c_;
+  double min_throttle_c_;
+  double max_omega_c_;
+  double min_omega_c_;
+
+  double start_time_ = 0.;
+  double current_time_ = 0.;
+
+  ErrStateErrStateMatrix A_;
+  ErrStateInputMatrix B_;
+  ErrStateErrStateMatrix Q_;
+  InputInputMatrix R_;
+
+  ErrStateErrStateMatrix P_;
+  InputErrStateMatrix K_;
+  CareSolver<dxZ, uZ> care_solver;
+
+  Eigen::Vector3d omega_current_;
+
+  StateVector x_;
+  StateVector x_c_;
+  ErrStateVector delta_x_;
+
+  InputVector u_;
+  InputVector ur_;
+
+  void saturateInput(InputVector &u);
+  void saturateErrorVec(Eigen::Vector3d &err, double max_err);
+
+  // ROS stuff
+  // Node handles, publishers, subscribers
+  ros::NodeHandle nh_;
+  ros::NodeHandle nh_private_;
+
+  // Publishers and Subscribers
+  ros::Subscriber state_sub_;
+  ros::Subscriber imu_sub_;
+  ros::Publisher command_pub_;
+
+  rosflight_msgs::Command command_msg_;
+
+  void publishCommand(const InputVector &u);
+  void stateCallback(const nav_msgs::OdometryConstPtr &msg);
+  void imuCallback(const sensor_msgs::ImuConstPtr &msg);
+};
+}
+
+#endif /* LQR_H */

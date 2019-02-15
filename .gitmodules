@@ -1,0 +1,6 @@
+[submodule "lib/geometry"]
+	path = lib/geometry
+	url = git@github.com:superjax/geometry.git
+[submodule "lib/lin_alg_tools"]
+	path = lib/lin_alg_tools
+	url = git@github.com:jerelbn/lin_alg_tools.git

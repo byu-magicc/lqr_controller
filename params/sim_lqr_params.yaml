@@ -1,0 +1,19 @@
+### Waypoints ###
+### Controller Parameters
+
+lqr_controller: {
+
+hover_throttle: 0.5,
+drag_constant: 0.1,
+
+lqr_max_pos_error: 10.,
+lqr_max_vel_error: 5.,
+lqr_max_ang_error: 1.,
+lqr_max_throttle_error: 0.5,
+lqr_max_omega_error: 1.,
+
+lqr_max_throttle_command: 1.,
+lqr_min_throttle_command: 0.,
+lqr_max_omega_command: 2.,
+lqr_min_omega_command: -2.,
+}

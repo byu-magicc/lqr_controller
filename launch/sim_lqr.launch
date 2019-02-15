@@ -10,7 +10,7 @@
 
   <!-- Start Simulator -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="paused" value="true"/>
+    <arg name="paused" value="false"/>
     <arg name="gui" value="true"/>
     <arg name="verbose" value="false"/>
     <arg name="debug" value="$(arg debug)"/>
@@ -32,30 +32,14 @@
 
     <!-- Load common parameters -->
     <rosparam command="load" file="$(find roscopter_sim)/params/$(arg mav_name).yaml"/>
+    <rosparam command="load" file="$(find lqr_controller)/params/sim_lqr_params.yaml"/>
 
-    <!-- Is Flying Publisher -->
-    <node pkg="rostopic" type="rostopic" name="is_flying_pub" args="pub is_flying std_msgs/Bool true"/>
-
-    <!-- Status Publisher -->
-    <node pkg="rostopic" type="rostopic" name="status_pub" args="pub -r 1 status rosflight_msgs/Status '{armed: true, failsafe: false, rc_override: false, offboard: true, error_code: 0, num_errors: 0, loop_time_us: 1}'"/>
-
-    <!-- PID Position Controller -->
-    <node name="controller" pkg="roscopter" type="controller" output="screen">
-      <remap from="estimate" to="ground_truth/odometry/NED"/> 
-      <!--<remap from="estimate" to="estimate"/>-->
+    <!--LQR Controller-->
+    <node pkg="lqr_controller" type="lqr_controller" name="lqr_controller" output="screen">
+      <remap from="estimate" to="ground_truth/odometry/NED"/>
+      <remap from="imu_data" to="imu/data"/>
+      <remap from="command" to ="command"/>
     </node>
-
-    <!-- Waypoint Manager -->
-    <node name="waypoint_manager" pkg="roscopter" type="waypoint_manager.py" output="screen">
-      <remap from="waypoint" to="high_level_command"/>
-      <remap from="state" to="ground_truth/odometry/NED"/> 
-      <!--<remap from="state" to="estimate"/>-->
-    </node>
-
-    <!-- plot states -->
-    <!--<node pkg="roscopter" type="states_plotter.py" name="states_plotter" output="screen">
-      <param name="time_window" value="10.0"/>
-    </node>-->
 
   </group>
 
