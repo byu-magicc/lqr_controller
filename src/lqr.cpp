@@ -1,4 +1,5 @@
 #include "lqr/lqr.h"
+#include "lqr/eigen.h"
 
 #include "geometry/quat.h"
 #include "geometry/support.h"
@@ -20,6 +21,43 @@ LQRController::LQRController() :
   nh_private_.getParam("lqr_min_throttle_command", min_throttle_c_);
   nh_private_.getParam("lqr_max_omega_command", max_omega_c_);
   nh_private_.getParam("lqr_min_omega_command", min_omega_c_);
+
+  if (nh_private_.getParam("figure8_trajectory", use_fig8_))
+  {
+    if (use_fig8_)
+    {
+      StateVector x0;
+      importMatrixFromParamServer(nh_private_, x0, "fig8_x0");
+
+      double x_width, y_width, z_width, period;
+      nh_private_.getParam("fig8_x_width", x_width);
+      nh_private_.getParam("fig8_y_width", y_width);
+      nh_private_.getParam("fig8_z_width", z_width);
+      nh_private_.getParam("fig8_period", period);
+
+      fig8_traj_.reset(
+          new Figure8(x_width, y_width, z_width, period, x0, hover_throttle_));
+    }
+  }
+
+  if (nh_private_.getParam("waypoint_trajectory", use_waypoints_))
+  {
+    if (use_waypoints_)
+    {
+      // TODO diff number of waypoints with MatrixXf
+      int num_waypoints = 5;
+      //nh_private_.getParam("fig8_x_width", x_width);
+
+      Eigen::Matrix<double, 5, 4> waypoints;
+      importMatrixFromParamServer(nh_private_, waypoints, "waypoints");
+
+      double waypoint_duration;
+      nh_private_.getParam("waypoint_duration", waypoint_duration);
+
+      wp_traj_.reset(new WaypointTrajectory<5>(
+          waypoints.transpose(), waypoint_duration, hover_throttle_));
+    }
+  }
 
   Q_.setZero();
   Q_.block<3, 3>(dxPOS, dxPOS) =
@@ -168,17 +206,10 @@ void LQRController::stateCallback(const nav_msgs::OdometryConstPtr &msg)
   x_(xATT+2) = msg->pose.pose.orientation.y;
   x_(xATT+3) = msg->pose.pose.orientation.z;
 
-
-  // TODO set commanded state
-  x_c_.setZero();
-  x_c_(xPOS+0) = 5.;
-  x_c_(xPOS+1) = -5.;
-  x_c_(xPOS+2) = -5.;
-  x_c_(xATT) = 1.;
-
-  // TODO set reference input
-  ur_.setZero();
-  ur_(uTHROTTLE) = hover_throttle_;
+  if (use_fig8_)
+    fig8_traj_->getCommandedState(current_time_, x_c_, ur_);
+  else if (use_waypoints_)
+    wp_traj_->getCommandedState(current_time_, x_c_, ur_);
 
   this->computeControl(x_, x_c_, ur_, u_);
   this->publishCommand(u_);

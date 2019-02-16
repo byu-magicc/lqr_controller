@@ -6,10 +6,14 @@
 #include <nav_msgs/Odometry.h>
 #include <sensor_msgs/Imu.h>
 
+#include <memory>
 #include <Eigen/Core>
 
 #include "lin_alg_tools/care.h"
 #include "geometry/quat.h"
+
+#include "lqr/figure8.h"
+#include "lqr/waypoints.h"
 
 enum : int {
   xPOS = 0,
@@ -87,6 +91,12 @@ private:
 
   void saturateInput(InputVector &u);
   void saturateErrorVec(Eigen::Vector3d &err, double max_err);
+
+  // Trajectory Stuff
+  bool use_fig8_ = false;
+  std::unique_ptr<Figure8> fig8_traj_ = nullptr;
+  bool use_waypoints_ = false;
+  std::unique_ptr<WaypointTrajectory<5>> wp_traj_ = nullptr;
 
   // ROS stuff
   // Node handles, publishers, subscribers
