@@ -20,7 +20,7 @@ enum : int {
   xPOS = 0,
   xATT = 3,
   xVEL = 7,
-  xOMEGA = 10, 
+  xOMEGA = 10,
   xZ = 13
 };
 

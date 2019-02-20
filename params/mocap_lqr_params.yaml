@@ -28,7 +28,8 @@ fig8_period: 2.,
 
 fig8_x0: [0., 0., -1.5,          # POS
           0., 0., 0.,           # VEL
-          1., 0., 0., 0.],          # ATT
+          1., 0., 0., 0.,       # ATT
+          0., 0., 0.],          # OMEGA
 
 # Waypoints
 waypoint_trajectory: false,

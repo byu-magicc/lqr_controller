@@ -19,7 +19,7 @@ lqr_min_omega_command: -2.,
 
 # Trajectory
 # Fig8
-figure8_trajectory: false,
+figure8_trajectory: true,
 fig8_x_width: 3.,
 fig8_y_width: 1.,
 fig8_z_width: 1.,
@@ -27,10 +27,11 @@ fig8_period: 4.,
 
 fig8_x0: [0., 0., -5.,          # POS
           0., 0., 0.,           # VEL
-          1., 0., 0., 0.],          # ATT
+          1., 0., 0., 0.,       # ATT
+          0., 0., 0.],          # OMEGA
 
 # Waypoints
-waypoint_trajectory: true,
+waypoint_trajectory: false,
 waypoint_duration: 5.,
 #waypoints: [0., 0., -5., 0.,    # N, E, D, YAW
             #0., -5., -5., 1.,

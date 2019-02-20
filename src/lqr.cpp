@@ -48,7 +48,6 @@ LQRController::LQRController() :
     {
       // TODO diff number of waypoints with MatrixXf
       int num_waypoints = 5;
-      //nh_private_.getParam("fig8_x_width", x_width);
 
       Eigen::Matrix<double, 5, 4> waypoints;
       importMatrixFromParamServer(nh_private_, waypoints, "waypoints");

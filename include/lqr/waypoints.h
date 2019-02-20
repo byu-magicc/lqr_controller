@@ -11,9 +11,10 @@ class WaypointTrajectory
 
 enum : int {
   xPOS = 0,
-  xVEL = 3,
-  xATT = 6,
-  xZ = 10
+  xATT = 3,
+  xVEL = 7,
+  xOMEGA = 10,
+  xZ = 13
 };
 
 enum : int {

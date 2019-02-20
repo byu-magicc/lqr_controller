@@ -10,9 +10,10 @@ class Figure8
 
 enum : int {
   xPOS = 0,
-  xVEL = 3,
-  xATT = 6,
-  xZ = 10
+  xATT = 3,
+  xVEL = 7,
+  xOMEGA = 10,
+  xZ = 13
 };
 
 enum : int {
@@ -101,6 +102,8 @@ public:
 
     u_r(0) = a_I.norm() / grav_ * hover_throttle_;
     u_r.bottomRows<3>() = (qnext - qprev) / (2.0 * dt);
+
+    x_c.block<3, 1>(xOMEGA, 0) = (qnext - qprev) / (2.0 * dt);
   }
 
 private:
