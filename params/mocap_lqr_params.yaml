@@ -1,0 +1,46 @@
+### Waypoints ###
+### Controller Parameters
+
+lqr_controller: {
+
+hover_throttle: 0.65,
+drag_constant: 0.1,
+
+lqr_max_pos_error: 10.,
+#lqr_max_pos_error: 5.,
+lqr_max_vel_error: 5.,
+lqr_max_ang_error: 1.,
+lqr_max_throttle_error: 0.5,
+lqr_max_omega_error: 1.,
+
+lqr_max_throttle_command: 1.,
+lqr_min_throttle_command: 0.,
+lqr_max_omega_command: 2.,
+lqr_min_omega_command: -2.,
+
+# Trajectory
+# Fig8
+figure8_trajectory: true,
+fig8_x_width: 0.5,
+fig8_y_width: 1.,
+fig8_z_width: 0.,
+fig8_period: 2.,
+
+fig8_x0: [0., 0., -1.5,          # POS
+          0., 0., 0.,           # VEL
+          1., 0., 0., 0.],          # ATT
+
+# Waypoints
+waypoint_trajectory: false,
+waypoint_duration: 5.,
+#waypoints: [0., 0., -5., 0.,    # N, E, D, YAW
+            #0., -5., -5., 1.,
+            #-5., 0., -5., 2.,
+            #0., 0., -1., 3.,
+            #0., 0., -10., 0.],
+waypoints: [0., 0., -1.5, 0.,    # N, E, D, YAW
+            0., 1., -1.5, 0.,
+            0., -1., -1.5, 0.,
+            0., 1., -1.5, 0.,
+            0., -1., -1.5, 0.],
+}
