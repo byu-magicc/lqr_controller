@@ -14,12 +14,14 @@
 
 #include "lqr/figure8.h"
 #include "lqr/waypoints.h"
+#include "lqr/logger.h"
 
 enum : int {
   xPOS = 0,
-  xVEL = 3,
-  xATT = 6,
-  xZ = 10
+  xATT = 3,
+  xVEL = 7,
+  xOMEGA = 10, 
+  xZ = 13
 };
 
 enum : int {
@@ -97,6 +99,9 @@ private:
   std::unique_ptr<Figure8> fig8_traj_ = nullptr;
   bool use_waypoints_ = false;
   std::unique_ptr<WaypointTrajectory<5>> wp_traj_ = nullptr;
+
+  // Logger
+  std::unique_ptr<Logger> log_ = nullptr;
 
   // ROS stuff
   // Node handles, publishers, subscribers

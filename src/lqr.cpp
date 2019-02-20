@@ -4,6 +4,8 @@
 #include "geometry/quat.h"
 #include "geometry/support.h"
 
+#include "lqr/logger.h"
+
 namespace lqr
 {
 LQRController::LQRController() :
@@ -76,6 +78,9 @@ LQRController::LQRController() :
   std::cout << "LQR Q: " << std::endl << Q_ << std::endl;
   std::cout << "LQR R: " << std::endl << R_ << std::endl;
 
+  // Setup logger
+  log_.reset(new Logger("/tmp/LQR_controller_mocap.bin"));
+
   // Set up Publishers and Subscriber
   state_sub_ =
       nh_.subscribe("estimate", 1, &LQRController::stateCallback, this);
@@ -143,6 +148,8 @@ void LQRController::computeControl(const StateVector &x, const StateVector &x_c,
   u = ur + K_ * delta_x_;
 
   saturateInput(u);
+
+  log_->logVectors(x, u, x_c, ur);
 }
 
 void LQRController::saturateInput(InputVector &u)
@@ -211,6 +218,7 @@ void LQRController::stateCallback(const nav_msgs::OdometryConstPtr &msg)
   else if (use_waypoints_)
     wp_traj_->getCommandedState(current_time_, x_c_, ur_);
 
+  log_->log(current_time_);
   this->computeControl(x_, x_c_, ur_, u_);
   this->publishCommand(u_);
 }
@@ -220,5 +228,7 @@ void LQRController::imuCallback(const sensor_msgs::ImuConstPtr &msg)
   omega_current_(0) = msg->angular_velocity.x;
   omega_current_(1) = msg->angular_velocity.y;
   omega_current_(2) = msg->angular_velocity.z;
+
+  x_.block<3, 1>(xOMEGA, 0) = omega_current_;
 }
 }
