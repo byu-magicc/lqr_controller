@@ -1,0 +1,43 @@
+<launch>
+
+  <arg name="mav_name" value="multirotor"/>
+
+  <!-- Simulation -->
+  <include file="$(find rosflight_sim)/launch/base.launch">
+    <arg name="mav_name" value="multirotor"/>
+    <!-- <arg name="world_file" value="$(find leo_sim)/worlds/light_sim.world"/> -->
+  </include>
+
+  <!-- FCU communication -->
+  <node name="rosflight_io" pkg="rosflight" type="rosflight_io" output="screen">
+    <param name="udp" value="true"/>
+  </node>
+
+  <!-- Load roscopter Parameters -->
+  <rosparam command="load" file="$(find roscopter_sim)/params/multirotor.yaml"/>
+
+  <!-- Is Flying Publisher -->
+  <node pkg="rostopic" type="rostopic" name="is_flying_pub" args="pub is_flying std_msgs/Bool true"/>
+
+  <!-- RC -->
+  <node name="rc_joy" pkg="rosflight_utils" type="rc_joy">
+    <remap from="RC" to="multirotor/RC"/>
+  </node>
+
+  <!-- Controller -->
+  <group ns="$(arg mav_name)">
+
+    <!-- Load common parameters -->
+    <rosparam command="load" file="$(find roscopter_sim)/params/$(arg mav_name).yaml"/>
+    <rosparam command="load" file="$(find lqr_controller)/params/sim_lqr_params.yaml"/>
+
+    <!--LQR Controller-->
+    <node pkg="lqr_controller" type="lqr_controller" name="lqr_controller" output="screen">
+      <remap from="estimate" to="/multirotor/truth/NED"/>
+      <remap from="imu_data" to="/imu/data"/>
+      <remap from="command" to ="/command"/>
+    </node>
+
+  </group>
+
+</launch>
