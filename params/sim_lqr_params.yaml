@@ -6,9 +6,10 @@ lqr_controller: {
 hover_throttle: 0.5,
 drag_constant: 0.1,
 
-lqr_max_pos_error: 10.,
-lqr_max_vel_error: 5.,
-lqr_max_ang_error: 1.,
+#lqr_max_pos_error: 10.,
+lqr_max_pos_error: .5,
+lqr_max_vel_error: 1.,
+lqr_max_ang_error: .3,
 lqr_max_throttle_error: 0.5,
 lqr_max_omega_error: 1.,
 
@@ -22,7 +23,7 @@ lqr_min_omega_command: -2.,
 figure8_trajectory: true,
 fig8_x_width: 3.,
 fig8_y_width: 1.,
-fig8_z_width: 1.,
+fig8_z_width: 0.,
 fig8_period: 4.,
 
 fig8_x0: [0., 0., -5.,          # POS
