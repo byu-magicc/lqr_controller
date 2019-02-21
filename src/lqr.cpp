@@ -229,7 +229,8 @@ void LQRController::stateCallback(const nav_msgs::OdometryConstPtr &msg)
   this->publishCommand(u_);
 
   high_resolution_clock::time_point t6 = high_resolution_clock::now();
-  double dur = (t6 - t1).count();
+  std::chrono::duration<double, std::micro> fp_ms = t6 - t1;
+  double dur = fp_ms.count();
 
   log_->log(dur);
 }

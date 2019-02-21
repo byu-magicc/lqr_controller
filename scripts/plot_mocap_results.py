@@ -1,3 +1,4 @@
+from __future__ import print_function
 import numpy as np
 import os,sys,inspect
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -16,9 +17,14 @@ data = np.reshape(np.fromfile("/tmp/LQR_controller_mocap.bin", dtype=np.float64)
 t = data[0,:]
 x = data[1:14,:]
 u = data[14:18,:]
-xc = data[18:32, :]
-ur = data[32:36, :]
-compute_time = data[36, :]
+xc = data[18:31, :]
+ur = data[31:35, :]
+
+compute_time = data[35, :]
+print("Mean compute time")
+print(np.mean(compute_time), "micro seconds")
+print("STD")
+print(np.std(compute_time), "micro seconds")
 
 pw = plotWindow()
 
