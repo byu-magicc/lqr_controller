@@ -6,6 +6,9 @@
 
 #include "lqr/logger.h"
 
+#include <chrono>
+using namespace std::chrono;
+
 namespace lqr
 {
 LQRController::LQRController() :
@@ -82,7 +85,7 @@ LQRController::LQRController() :
 
   // Set up Publishers and Subscriber
   state_sub_ =
-      nh_.subscribe("estimate", 1, &LQRController::stateCallback, this);
+      nh_.subscribe("estimate", 50, &LQRController::stateCallback, this);
 
   command_pub_ = nh_.advertise<rosflight_msgs::Command>("command", 1);
 }
@@ -95,6 +98,8 @@ void LQRController::computeControl(const StateVector &x, const StateVector &x_c,
   // x_c - desired state
   // u - output [F (throttle 0 -> 1.0), omega_x, omega_y, omega_z].T
   // ur - reference output
+
+  high_resolution_clock::time_point t1 = high_resolution_clock::now();
 
   Eigen::Matrix3d M = drag_const_ * Eigen::Matrix3d::Identity();
   M(2, 2) = 0.;
@@ -146,6 +151,10 @@ void LQRController::computeControl(const StateVector &x, const StateVector &x_c,
 
   saturateInput(u);
 
+  high_resolution_clock::time_point t2 = high_resolution_clock::now();
+  auto duration = duration_cast<microseconds>( t2 - t1 ).count();
+  std::cout << "computeControl run time: " << duration << " us" << std::endl;
+
   log_->logVectors(x, u, x_c, ur);
 }
 
@@ -189,6 +198,8 @@ void LQRController::publishCommand(const InputVector &u)
 
 void LQRController::stateCallback(const nav_msgs::OdometryConstPtr &msg)
 {
+  high_resolution_clock::time_point t1 = high_resolution_clock::now();
+
   if(start_time_ == 0)
   {
     start_time_ = msg->header.stamp.toSec();
@@ -214,13 +225,30 @@ void LQRController::stateCallback(const nav_msgs::OdometryConstPtr &msg)
   x_(xOMEGA+1) = msg->twist.twist.angular.y;
   x_(xOMEGA+2) = msg->twist.twist.angular.z;
 
+  high_resolution_clock::time_point t2 = high_resolution_clock::now();
   if (use_fig8_)
     fig8_traj_->getCommandedState(current_time_, x_c_, ur_);
   else if (use_waypoints_)
     wp_traj_->getCommandedState(current_time_, x_c_, ur_);
+  high_resolution_clock::time_point t3 = high_resolution_clock::now();
 
   log_->log(current_time_);
+  high_resolution_clock::time_point t4 = high_resolution_clock::now();
   this->computeControl(x_, x_c_, ur_, u_);
+  high_resolution_clock::time_point t5 = high_resolution_clock::now();
   this->publishCommand(u_);
+  high_resolution_clock::time_point t6 = high_resolution_clock::now();
+
+  auto traj_duration = duration_cast<microseconds>( t3 - t2 ).count();
+  auto log_duration = duration_cast<microseconds>(t4 - t3).count();
+  auto control_duration = duration_cast<microseconds>(t5 - t4).count();
+  auto publish_duration = duration_cast<microseconds>(t6-t5).count();
+  auto total_duration = duration_cast<microseconds>(t6 - t1).count();
+
+  std::cout << "traj run time: " << traj_duration << " us" << std::endl;
+  std::cout << "log run time: " << log_duration << " us" << std::endl;
+  std::cout << "control run time: " << control_duration << " us" << std::endl;
+  std::cout << "pub run time: " << publish_duration << " us" << std::endl;
+  std::cout << "total run time: " << total_duration << " us" << std::endl;
 }
 }
