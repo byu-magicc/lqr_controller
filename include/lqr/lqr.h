@@ -82,8 +82,6 @@ private:
   InputErrStateMatrix K_;
   CareSolver<dxZ, uZ> care_solver;
 
-  Eigen::Vector3d omega_current_;
-
   StateVector x_;
   StateVector x_c_;
   ErrStateVector delta_x_;
@@ -110,14 +108,12 @@ private:
 
   // Publishers and Subscribers
   ros::Subscriber state_sub_;
-  ros::Subscriber imu_sub_;
   ros::Publisher command_pub_;
 
   rosflight_msgs::Command command_msg_;
 
   void publishCommand(const InputVector &u);
   void stateCallback(const nav_msgs::OdometryConstPtr &msg);
-  void imuCallback(const sensor_msgs::ImuConstPtr &msg);
 };
 }
 

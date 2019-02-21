@@ -83,8 +83,6 @@ LQRController::LQRController() :
   // Set up Publishers and Subscriber
   state_sub_ =
       nh_.subscribe("estimate", 1, &LQRController::stateCallback, this);
-  imu_sub_ =
-      nh_.subscribe("imu_data", 1, &LQRController::imuCallback, this);
 
   command_pub_ = nh_.advertise<rosflight_msgs::Command>("command", 1);
 }
@@ -106,7 +104,7 @@ void LQRController::computeControl(const StateVector &x, const StateVector &x_c,
   const Eigen::Vector3d vel_b = x.block<3, 1>(xVEL, 0);
   const quat::Quatd q_I_b(x.block<4, 1>(xATT, 0));
   const Eigen::Matrix3d R_I_b = q_I_b.R();
-  const Eigen::Vector3d omega_b = omega_current_;
+  const Eigen::Vector3d omega_b = x.block<3, 1>(xOMEGA, 0);
   const Eigen::Matrix3d skew_omega = skew(omega_b);
   const Eigen::Matrix3d skew_vel = skew(vel_b);
 
@@ -212,6 +210,10 @@ void LQRController::stateCallback(const nav_msgs::OdometryConstPtr &msg)
   x_(xATT+2) = msg->pose.pose.orientation.y;
   x_(xATT+3) = msg->pose.pose.orientation.z;
 
+  x_(xOMEGA+0) = msg->twist.twist.angular.x;
+  x_(xOMEGA+1) = msg->twist.twist.angular.y;
+  x_(xOMEGA+2) = msg->twist.twist.angular.z;
+
   if (use_fig8_)
     fig8_traj_->getCommandedState(current_time_, x_c_, ur_);
   else if (use_waypoints_)
@@ -220,14 +222,5 @@ void LQRController::stateCallback(const nav_msgs::OdometryConstPtr &msg)
   log_->log(current_time_);
   this->computeControl(x_, x_c_, ur_, u_);
   this->publishCommand(u_);
-}
-
-void LQRController::imuCallback(const sensor_msgs::ImuConstPtr &msg)
-{
-  omega_current_(0) = msg->angular_velocity.x;
-  omega_current_(1) = msg->angular_velocity.y;
-  omega_current_(2) = msg->angular_velocity.z;
-
-  x_.block<3, 1>(xOMEGA, 0) = omega_current_;
 }
 }
