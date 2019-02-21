@@ -10,7 +10,7 @@ np.set_printoptions(linewidth=150)
 plt.rc('text', usetex=True)
 plt.rc('font', family='serif')
 
-LOG_WIDTH = 1 + 13 + 4 + 13 + 4
+LOG_WIDTH = 1 + 13 + 4 + 13 + 4 + 1
 
 data = np.reshape(np.fromfile("/tmp/LQR_controller_mocap.bin", dtype=np.float64), (-1, LOG_WIDTH)).T
 t = data[0,:]
@@ -18,6 +18,7 @@ x = data[1:14,:]
 u = data[14:18,:]
 xc = data[18:32, :]
 ur = data[32:36, :]
+compute_time = data[36, :]
 
 pw = plotWindow()
 
