@@ -47,15 +47,13 @@ public:
     x0_p_ = x0_.block<3, 1>(xPOS, 0);
   }
 
-  Eigen::Vector3d getAccel(const double &t)
+  Eigen::Vector3d getPddot(const double &t)
   {
     static const double f = T_ / (2.0 * M_PI);
     Eigen::Vector3d a_I;
     a_I.x() = -ax_ * f * f * std::sin(t * f);
     a_I.y() = -ay_ * 4.0 * f * f * std::sin(2.0 * t * f);
     a_I.z() = -az_ * f * f * std::sin(t * f);
-    static const Eigen::Vector3d grav_vec(0., 0., grav_);
-    a_I = a_I + grav_vec;
     return a_I;
   }
 
@@ -69,7 +67,7 @@ public:
     return p_I;
   }
 
-  Eigen::Vector3d getVelocity(const double &t)
+  Eigen::Vector3d getPdot(const double &t)
   {
     static const double f = T_ / (2.0 * M_PI);
     Eigen::Vector3d v_I;
@@ -79,31 +77,31 @@ public:
     return v_I;
   }
 
-  void getCommandedState(const double &t, StateVector &x_c, InputVector &u_r)
+  void getCommandedState(const double &t, StateVector &x_c, Eigen::Vector4d &u_r)
   {
+    static const Eigen::Vector3d grav_vec(0., 0., grav_);
     static const Eigen::Vector3d e_z(0., 0., 1.);
 
-    Eigen::Vector3d a_I = getAccel(t);
-    quat::Quatd x_c_q =
-        quat::Quatd::from_two_unit_vectors(a_I.normalized(), e_z);
-    
     x_c.block<3, 1>(xPOS, 0) = getPosition(t);
-    x_c.block<3, 1>(xVEL, 0) = x_c_q.rotp(getVelocity(t));
+
+    Eigen::Vector3d pddot_I = getPddot(t);
+    Eigen::Vector3d a_I = grav_vec - pddot_I;
+    quat::Quatd x_c_q =
+        quat::Quatd::from_two_unit_vectors(e_z, a_I.normalized());
     x_c.block<4, 1>(xATT, 0) = x_c_q.elements();
+    x_c.block<3, 1>(xVEL, 0) = x_c_q.rotp(getPdot(t));
 
-    const double dt = 1e-2;
-    Eigen::Vector3d a_I_prev = getAccel(t - dt);
-    Eigen::Vector3d a_I_next = getAccel(t + dt);
-
+    double dt = 1e-2;
+    Eigen::Vector3d a_I_prev = grav_vec - getPddot(t - dt);
+    Eigen::Vector3d a_I_next = grav_vec - getPddot(t + dt);
     quat::Quatd qprev =
-        quat::Quatd::from_two_unit_vectors(a_I_prev.normalized(), e_z);
+        quat::Quatd::from_two_unit_vectors(e_z, a_I_prev.normalized());
     quat::Quatd qnext =
-        quat::Quatd::from_two_unit_vectors(a_I_next.normalized(), e_z);
-
-    u_r(0) = a_I.norm() / grav_ * hover_throttle_;
-    u_r.bottomRows<3>() = (qnext - qprev) / (2.0 * dt);
-
+        quat::Quatd::from_two_unit_vectors(e_z, a_I_next.normalized());
     x_c.block<3, 1>(xOMEGA, 0) = (qnext - qprev) / (2.0 * dt);
+
+    u_r(0) = hover_throttle_ / grav_ * a_I.norm();
+    u_r.bottomRows<3>() = x_c.block<3, 1>(xOMEGA, 0);
   }
 
 private:
