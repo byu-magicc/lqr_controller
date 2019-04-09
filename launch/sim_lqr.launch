@@ -4,13 +4,13 @@
   <arg name="color"               default="White"/>
   <arg name="x"                   default="0"/>
   <arg name="y"                   default="0"/>
-  <arg name="z"                   default="5.0"/>
+  <arg name="z"                   default="0.1"/>
   <arg name="yaw"                 default="0"/>
   <arg name="debug"               default="false"/>
 
   <!-- Start Simulator -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="paused" value="true"/>
+    <arg name="paused" value="false"/>
     <arg name="gui" value="true"/>
     <arg name="verbose" value="false"/>
     <arg name="debug" value="$(arg debug)"/>
@@ -27,7 +27,7 @@
     <arg name="color"               value="$(arg color)"/>
   </include>
 
-  <node pkg="topic_tools" type="throttle" name="throttle" args="messages /multirotor/ground_truth/odometry/NED 1000"/>
+  <!--<node pkg="topic_tools" type="throttle" name="throttle" args="messages /multirotor/ground_truth/odometry/NED 1000"/>-->
 
   <!-- Controller -->
   <group ns="$(arg mav_name)">

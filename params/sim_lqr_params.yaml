@@ -10,23 +10,30 @@ drag_constant: 0.1,
 lqr_max_pos_error: .5,
 lqr_max_vel_error: 1.,
 lqr_max_ang_error: .3,
-lqr_max_throttle_error: 0.5,
-lqr_max_omega_error: 1.,
+#lqr_max_throttle_error: 0.5,
+#lqr_max_omega_error: 1.,
 
 lqr_max_throttle_command: 1.,
 lqr_min_throttle_command: 0.,
 lqr_max_omega_command: 2.,
 lqr_min_omega_command: -2.,
 
+# Gains for dxPos, dxVel, dxAtt
+#Q: [2., 2., 2., 1., 1., 1., 3.33, 3.33, 3.33],
+Q: [3., 3., 6., 0.7, 0.7, 1., 1., 1., 1.],
+
+# Gains for uThrottle, uOmega
+R: [5., 1., 1., 1.],
+
 # Trajectory
 # Fig8
 figure8_trajectory: true,
-fig8_x_width: 3.,
-fig8_y_width: 1.,
+fig8_x_width: 1.5,
+fig8_y_width: 1.0,
 fig8_z_width: 0.,
-fig8_period: 9.,
+fig8_period: 6.,
 
-fig8_x0: [0., 0., -5.,          # POS
+fig8_x0: [0., 0., -3.,          # POS
           0., 0., 0.,           # VEL
           1., 0., 0., 0.,       # ATT
           0., 0., 0.],          # OMEGA

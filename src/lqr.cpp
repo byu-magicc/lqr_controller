@@ -20,8 +20,8 @@ LQRController::LQRController() :
   nh_private_.getParam("lqr_max_pos_error", max_pos_err_);
   nh_private_.getParam("lqr_max_vel_error", max_vel_err_);
   nh_private_.getParam("lqr_max_ang_error", max_ang_err_);
-  nh_private_.getParam("lqr_max_throttle_error", max_throttle_err_);
-  nh_private_.getParam("lqr_max_omega_error", max_omega_err_);
+  //nh_private_.getParam("lqr_max_throttle_error", max_throttle_err_);
+  //nh_private_.getParam("lqr_max_omega_error", max_omega_err_);
   nh_private_.getParam("lqr_max_throttle_command", max_throttle_c_);
   nh_private_.getParam("lqr_min_throttle_command", min_throttle_c_);
   nh_private_.getParam("lqr_max_omega_command", max_omega_c_);
@@ -63,18 +63,27 @@ LQRController::LQRController() :
     }
   }
 
-  Q_.setZero();
-  Q_.block<3, 3>(dxPOS, dxPOS) =
-      (1. / max_pos_err_) * Eigen::Matrix3d::Identity();
-  Q_.block<3, 3>(dxVEL, dxVEL) =
-      (1. / max_vel_err_) * Eigen::Matrix3d::Identity();
-  Q_.block<3, 3>(dxATT, dxATT) =
-      (1. / max_ang_err_) * Eigen::Matrix3d::Identity();
+  ErrStateVector q_diag;
+  importMatrixFromParamServer(nh_private_, q_diag, "Q");
+  Q_ = q_diag.asDiagonal();
 
-  R_.setZero();
-  R_(uTHROTTLE, uTHROTTLE) = (1. / max_throttle_err_);
-  R_.block<3, 3>(uOMEGA, uOMEGA) =
-      (1. / max_omega_err_) * Eigen::Matrix3d::Identity();
+  InputVector r_diag;
+  importMatrixFromParamServer(nh_private_, r_diag, "R");
+  R_ = r_diag.asDiagonal();
+
+  // Using purely Bryson's Rule
+  //Q_.setZero();
+  //Q_.block<3, 3>(dxPOS, dxPOS) =
+      //(1. / max_pos_err_) * Eigen::Matrix3d::Identity();
+  //Q_.block<3, 3>(dxVEL, dxVEL) =
+      //(1. / max_vel_err_) * Eigen::Matrix3d::Identity();
+  //Q_.block<3, 3>(dxATT, dxATT) =
+      //(1. / max_ang_err_) * Eigen::Matrix3d::Identity();
+
+  //R_.setZero();
+  //R_(uTHROTTLE, uTHROTTLE) = (1. / max_throttle_err_);
+  //R_.block<3, 3>(uOMEGA, uOMEGA) =
+      //(1. / max_omega_err_) * Eigen::Matrix3d::Identity();
 
   std::cout << "LQR INIT:" << std::endl;
   std::cout << "LQR Q: " << std::endl << Q_ << std::endl;
