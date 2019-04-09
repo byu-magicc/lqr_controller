@@ -24,7 +24,7 @@ figure8_trajectory: true,
 fig8_x_width: 3.,
 fig8_y_width: 1.,
 fig8_z_width: 0.,
-fig8_period: 4.,
+fig8_period: 9.,
 
 fig8_x0: [0., 0., -5.,          # POS
           0., 0., 0.,           # VEL

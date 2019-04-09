@@ -49,7 +49,7 @@ public:
 
   Eigen::Vector3d getPddot(const double &t)
   {
-    static const double f = T_ / (2.0 * M_PI);
+    static const double f = (2.0 * M_PI) / T_;
     Eigen::Vector3d a_I;
     a_I.x() = -ax_ * f * f * std::sin(t * f);
     a_I.y() = -ay_ * 4.0 * f * f * std::sin(2.0 * t * f);
@@ -59,7 +59,7 @@ public:
 
   Eigen::Vector3d getPosition(const double &t)
   {
-    static const double f = T_ / (2.0 * M_PI);
+    static const double f = (2.0 * M_PI) / T_;
     Eigen::Vector3d p_I;
     p_I.x() = x0_p_.x() + ax_ * std::sin(t * f);
     p_I.y() = x0_p_.y() + ay_ * std::sin(2.0 * t * f);
@@ -69,7 +69,7 @@ public:
 
   Eigen::Vector3d getPdot(const double &t)
   {
-    static const double f = T_ / (2.0 * M_PI);
+    static const double f = (2.0 * M_PI) / T_;
     Eigen::Vector3d v_I;
     v_I.x() = ax_ * f * std::cos(t * f);
     v_I.y() = ay_ * 2.0 * f * std::cos(2.0 * t * f);
