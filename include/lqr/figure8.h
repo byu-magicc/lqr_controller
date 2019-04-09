@@ -43,13 +43,15 @@ public:
     T_ = period;
     x0_ = _x0;
     hover_throttle_ = _hover_throttle;
+    t_offset_ = 0.;
 
     x0_p_ = x0_.block<3, 1>(xPOS, 0);
   }
 
-  Eigen::Vector3d getPddot(const double &t)
+  Eigen::Vector3d getPddot(const double &time)
   {
-    static const double f = (2.0 * M_PI) / T_;
+    const double t = time + t_offset_;
+    const double f = (2.0 * M_PI) / T_;
     Eigen::Vector3d a_I;
     a_I.x() = -ax_ * f * f * std::sin(t * f);
     a_I.y() = -ay_ * 4.0 * f * f * std::sin(2.0 * t * f);
@@ -57,9 +59,10 @@ public:
     return a_I;
   }
 
-  Eigen::Vector3d getPosition(const double &t)
+  Eigen::Vector3d getPosition(const double &time)
   {
-    static const double f = (2.0 * M_PI) / T_;
+    const double t = time + t_offset_;
+    const double f = (2.0 * M_PI) / T_;
     Eigen::Vector3d p_I;
     p_I.x() = x0_p_.x() + ax_ * std::sin(t * f);
     p_I.y() = x0_p_.y() + ay_ * std::sin(2.0 * t * f);
@@ -67,9 +70,10 @@ public:
     return p_I;
   }
 
-  Eigen::Vector3d getPdot(const double &t)
+  Eigen::Vector3d getPdot(const double &time)
   {
-    static const double f = (2.0 * M_PI) / T_;
+    const double t = time + t_offset_;
+    const double f = (2.0 * M_PI) / T_;
     Eigen::Vector3d v_I;
     v_I.x() = ax_ * f * std::cos(t * f);
     v_I.y() = ay_ * 2.0 * f * std::cos(2.0 * t * f);
@@ -103,9 +107,30 @@ public:
     u_r(0) = hover_throttle_ / grav_ * a_I.norm();
     u_r.bottomRows<3>() = x_c.block<3, 1>(xOMEGA, 0);
   }
+  
+  void setPeriod(const double new_t)
+  {
+    std::cout << "New Figure8 period: " << new_t << std::endl;
+    T_ = new_t;
+  }
+
+  void setPeriod(const double new_t, const double time)
+  {
+    std::cout << "Position before: " << getPosition(time) << std::endl;
+
+    const double f_old = (2.0 * M_PI) / T_;
+    const double f_new = (2.0 * M_PI) / new_t;
+    t_offset_ = (f_old / f_new) * (time + t_offset_) - time;
+    std::cout << "New Figure8 period: " << new_t << std::endl;
+    std::cout << "New Time Offset: " << t_offset_ << std::endl;
+
+    T_ = new_t;
+    std::cout << "Position after: " << getPosition(time) << std::endl;
+  }
 
 private:
   double ax_, ay_, az_, T_;
+  double t_offset_;
   double hover_throttle_;
   const double grav_ = 9.8;
   StateVector x0_;

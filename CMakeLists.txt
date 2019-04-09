@@ -14,6 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   nav_msgs
   rosflight_msgs
+  dynamic_reconfigure
 )
 
 find_package(Eigen3 REQUIRED)
@@ -21,10 +22,15 @@ find_package(Eigen3 REQUIRED)
 add_subdirectory(lib/geometry)
 add_subdirectory(lib/lin_alg_tools)
 
+generate_dynamic_reconfigure_options(
+  cfg/Figure8.cfg)
+
 catkin_package(
   INCLUDE_DIRS include ${EIGEN3_INCLUDE_DIRS}
   CATKIN_DEPENDS roscpp std_msgs geometry_msgs nav_msgs rosflight_msgs
+  dynamic_reconfigure
 )
+
 
 ###########
 ## Build ##
@@ -41,6 +47,7 @@ include_directories(
 add_executable(lqr_controller
   src/lqr.cpp
   src/lqr_node.cpp)
-add_dependencies(lqr_controller ${catkin_EXPORTED_TARGETS})
+add_dependencies(lqr_controller ${catkin_EXPORTED_TARGETS}
+  %{PROJECT_NAME}_gencfg)
 target_link_libraries(lqr_controller ${catkin_LIBRARIES} lin_alg_tools)
 

@@ -92,6 +92,9 @@ LQRController::LQRController() :
   // Setup logger
   log_.reset(new Logger("/tmp/LQR_controller_mocap.bin"));
 
+  func_ = boost::bind(&LQRController::reconfigureCallback, this, _1, _2);
+  server_.setCallback(func_);
+
   // Set up Publishers and Subscriber
   state_sub_ =
       nh_.subscribe("estimate", 50, &LQRController::stateCallback, this);
@@ -242,5 +245,11 @@ void LQRController::stateCallback(const nav_msgs::OdometryConstPtr &msg)
   double dur = fp_ms.count();
 
   log_->log(dur);
+}
+
+void LQRController::reconfigureCallback(lqr_controller::Figure8Config &config,
+                            uint32_t level)
+{
+  fig8_traj_->setPeriod(config.fig8_period, current_time_);
 }
 }

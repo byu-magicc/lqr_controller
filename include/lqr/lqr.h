@@ -5,6 +5,8 @@
 #include <rosflight_msgs/Command.h>
 #include <nav_msgs/Odometry.h>
 #include <sensor_msgs/Imu.h>
+#include <dynamic_reconfigure/server.h>
+#include <lqr_controller/Figure8Config.h>
 
 #include <memory>
 #include <Eigen/Core>
@@ -114,6 +116,11 @@ private:
 
   void publishCommand(const InputVector &u);
   void stateCallback(const nav_msgs::OdometryConstPtr &msg);
+
+  dynamic_reconfigure::Server<lqr_controller::Figure8Config> server_;
+  dynamic_reconfigure::Server<lqr_controller::Figure8Config>::CallbackType func_;
+  void reconfigureCallback(lqr_controller::Figure8Config &config,
+                            uint32_t level);
 };
 }
 
