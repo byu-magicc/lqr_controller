@@ -19,24 +19,30 @@ drag_constant: 0.1,
 #lqr_min_omega_command: -2.,
 
 # Waypoints
-lqr_max_pos_error: 0.5,
+lqr_max_pos_error: 0.2,
+lqr_max_alt_error: 0.1,
 lqr_max_vel_error: 2.,
-lqr_max_ang_error: 0.3,
-lqr_max_throttle_error: 0.35,
-lqr_max_omega_error: 0.25,
+lqr_max_ang_error: 0.2,
+#lqr_max_throttle_error: 0.35,
+#lqr_max_omega_error: 0.25,
 
 lqr_max_throttle_command: 0.85,
 lqr_min_throttle_command: 0.,
 lqr_max_omega_command: 2.,
 lqr_min_omega_command: -2.,
 
+#Q: [2., 2., 2., 0.5, 0.5, 0.5, 3.33, 3.33, 3.33],
+Q: [4., 4., 6., 1.5, 1.5, 1.5, 1., 1., 1.],
+#R: [2.85714, 4., 4., 4.],
+R: [10., 2., 2., 1.0],
+
 # Trajectory
 # Fig8
-figure8_trajectory: false,
+figure8_trajectory: true,
 fig8_x_width: 0.5,
 fig8_y_width: 1.,
-fig8_z_width: 0.5,
-fig8_period: 2.,
+fig8_z_width: 0.,
+fig8_period: 18.,
 
 fig8_x0: [0., 0., -1.5,          # POS
           0., 0., 0.,           # VEL
@@ -44,7 +50,7 @@ fig8_x0: [0., 0., -1.5,          # POS
           0., 0., 0.],          # OMEGA
 
 # Waypoints
-waypoint_trajectory: true,
+waypoint_trajectory: false,
 waypoint_duration: 10.,
 #waypoints: [0., 0., -5., 0.,    # N, E, D, YAW
             #0., -5., -5., 1.,
