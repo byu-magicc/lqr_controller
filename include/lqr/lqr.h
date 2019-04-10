@@ -62,6 +62,7 @@ private:
   double drag_const_;
 
   double max_pos_err_;
+  double max_alt_err_;
   double max_ang_err_;
   double max_vel_err_;
   double max_throttle_err_;
@@ -93,6 +94,7 @@ private:
 
   void saturateInput(InputVector &u);
   void saturateErrorVec(Eigen::Vector3d &err, double max_err);
+  void saturateErrorVec(Eigen::Vector3d &err, double max_err, double max_err2);
 
   // Trajectory Stuff
   bool use_fig8_ = false;

@@ -18,6 +18,7 @@ LQRController::LQRController() :
   nh_private_.getParam("hover_throttle", hover_throttle_);
   nh_private_.getParam("drag_constant", drag_const_);
   nh_private_.getParam("lqr_max_pos_error", max_pos_err_);
+  nh_private_.getParam("lqr_max_alt_error", max_alt_err_);
   nh_private_.getParam("lqr_max_vel_error", max_vel_err_);
   nh_private_.getParam("lqr_max_ang_error", max_ang_err_);
   //nh_private_.getParam("lqr_max_throttle_error", max_throttle_err_);
@@ -143,7 +144,8 @@ void LQRController::computeControl(const StateVector &x, const StateVector &x_c,
   K_ = -R_.inverse() * B_.transpose() * P_;
 
   Eigen::Vector3d pos_err = x.block<3, 1>(xPOS, 0) - x_c.block<3, 1>(xPOS, 0);
-  saturateErrorVec(pos_err, max_pos_err_);
+  //saturateErrorVec(pos_err, max_pos_err_);
+  saturateErrorVec(pos_err, max_pos_err_, max_alt_err_);
 
   Eigen::Vector3d vel_err = x.block<3, 1>(xVEL, 0) - x_c.block<3, 1>(xVEL, 0);
   saturateErrorVec(vel_err, max_vel_err_);
@@ -187,6 +189,19 @@ void LQRController::saturateErrorVec(Eigen::Vector3d& err, double max_err)
     if (std::abs(err(i)) > max_err)
       err(i) = err(i) / std::abs(err(i)) * max_err;
   }
+}
+
+void LQRController::saturateErrorVec(Eigen::Vector3d &err, double max_err,
+                                     double max_err2)
+{
+  for (int i = 0; i < 2; i++)
+  {
+    if (std::abs(err(i)) > max_err)
+      err(i) = err(i) / std::abs(err(i)) * max_err;
+  }
+  int i = 2;
+  if (std::abs(err(i)) > max_err2)
+    err(i) = err(i) / std::abs(err(i)) * max_err2;
 }
 
 void LQRController::publishCommand(const InputVector &u)

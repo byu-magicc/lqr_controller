@@ -116,16 +116,12 @@ public:
 
   void setPeriod(const double new_t, const double time)
   {
-    std::cout << "Position before: " << getPosition(time) << std::endl;
-
     const double f_old = (2.0 * M_PI) / T_;
     const double f_new = (2.0 * M_PI) / new_t;
     t_offset_ = (f_old / f_new) * (time + t_offset_) - time;
     std::cout << "New Figure8 period: " << new_t << std::endl;
-    std::cout << "New Time Offset: " << t_offset_ << std::endl;
 
     T_ = new_t;
-    std::cout << "Position after: " << getPosition(time) << std::endl;
   }
 
 private:
